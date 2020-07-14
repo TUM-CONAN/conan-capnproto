@@ -1,4 +1,5 @@
 from conans import CMake, ConanFile, tools
+import os
 
 
 class CapNProtoConan(ConanFile):
@@ -16,6 +17,8 @@ class CapNProtoConan(ConanFile):
         "shared": True,
     }
 
+    _src_folder = "capnproto-c++-%s" % version
+
     def source(self):
         tools.get("https://capnproto.org/capnproto-c++-%s.tar.gz" % self.version)
 
@@ -32,11 +35,18 @@ class CapNProtoConan(ConanFile):
         for option, value in self.options.items():
             add_cmake_option(option, value)
 
-        cmake.configure(source_folder="capnproto-c++-%s" % self.version)
+        cmake.configure(source_folder=self._src_folder)
         return cmake
 
     def build(self):
         cmake = self._cmake_configure()
+
+        if self.settings.os == "Linux":
+            tools.replace_in_file(os.path.join(self._src_folder, "cmake", "CapnProtoMacros.cmake"),
+                'COMMAND "${CAPNP_EXECUTABLE}"',
+                'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}" ${CAPNP_EXECUTABLE}'
+                )
+       
         cmake.build()
 
     def package(self):
