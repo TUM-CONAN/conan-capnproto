@@ -41,10 +41,10 @@ class CapNProtoConan(ConanFile):
     def build(self):
         cmake = self._cmake_configure()
 
-        if self.settings.os == "Linux":
+        if self.options.shared and self.settings.os == "Linux":
             tools.replace_in_file(os.path.join(self._src_folder, "cmake", "CapnProtoMacros.cmake"),
                 'COMMAND "${CAPNP_EXECUTABLE}"',
-                'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}" ${CAPNP_EXECUTABLE}'
+                'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CONAN_LIB_DIRS_CAPNPROTO}:${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}" ${CAPNP_EXECUTABLE}'
                 )
        
         cmake.build()
