@@ -49,8 +49,8 @@ class CapNProtoConan(ConanFile):
        
         if self.settings.os == "Windows":
             tools.replace_in_file(os.path.join(self._src_folder, "src", "capnp", "CMakeLists.txt"),
-                'install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E create_symlink capnp${CMAKE_EXECUTABLE_SUFFIX} \"\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\")")',
-                '#install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" -E create_symlink capnp${CMAKE_EXECUTABLE_SUFFIX} \"\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\")")'
+                'install(CODE "execute_process(COMMAND \\"${CMAKE_COMMAND}\\" -E create_symlink capnp${CMAKE_EXECUTABLE_SUFFIX} \\"\\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\\")")',
+                '#install(CODE "execute_process(COMMAND \\"${CMAKE_COMMAND}\\" -E create_symlink capnp${CMAKE_EXECUTABLE_SUFFIX} \\"\\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\\")")'
                 )
         cmake.build()
 
