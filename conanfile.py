@@ -46,6 +46,15 @@ class CapNProtoConan(ConanFile):
                 'COMMAND "${CAPNP_EXECUTABLE}"',
                 'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CONAN_LIB_DIRS_CAPNPROTO}:${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}" ${CAPNP_EXECUTABLE}'
                 )
+            tools.replace_in_file(os.path.join(self._src_folder, "src", "kj", "CMakeLists.txt"),
+                'set_target_properties(kj PROPERTIES VERSION ${VERSION})',
+                'set_target_properties(kj PROPERTIES VERSION ${VERSION})\nset_target_properties(kj PROPERTIES POSITION_INDEPENDENT_CODE ON)'
+                )
+            tools.replace_in_file(os.path.join(self._src_folder, "src", "capnp", "CMakeLists.txt"),
+                'set_target_properties(capnp PROPERTIES VERSION ${VERSION})',
+                'set_target_properties(capnp PROPERTIES VERSION ${VERSION})\nset_target_properties(capnp PROPERTIES POSITION_INDEPENDENT_CODE ON)'
+                )
+       
        
         if self.settings.os == "Windows":
             tools.replace_in_file(os.path.join(self._src_folder, "src", "capnp", "CMakeLists.txt"),
