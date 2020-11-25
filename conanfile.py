@@ -69,3 +69,5 @@ class CapNProtoConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.lib = tools.collect_libs(self)
+        if not self.cpp_info.lib:
+            self.cpp_info.lib = ['kj', 'capnp', 'capnp-rpc']
