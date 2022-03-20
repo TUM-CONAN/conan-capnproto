@@ -4,11 +4,12 @@ import os
 
 class CapNProtoConan(ConanFile):
     name = "capnproto"
-    version = tools.get_env("GIT_TAG", "0.8.0")
+    version = tools.get_env("GIT_TAG", "0.9.1")
     license = "MIT"
     description = "Cap'n Proto serialization/RPC system"
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake"
+    exports = ["patches/*",]
     options = {
         "shared": [True, False],
     }
@@ -17,10 +18,10 @@ class CapNProtoConan(ConanFile):
         "shared": True,
     }
 
-    _src_folder = "capnproto-c++-%s" % version
+    _src_folder = "capnproto-%s" % version
 
     def source(self):
-        tools.get("https://capnproto.org/capnproto-c++-%s.tar.gz" % self.version)
+        tools.get("https://github.com/capnproto/capnproto/archive/refs/tags/v%s.tar.gz" % self.version)
 
     def _cmake_configure(self):
         cmake = CMake(self)
@@ -42,22 +43,25 @@ class CapNProtoConan(ConanFile):
         cmake = self._cmake_configure()
 
         if self.options.shared and self.settings.os == "Linux":
-            tools.replace_in_file(os.path.join(self._src_folder, "cmake", "CapnProtoMacros.cmake"),
+            tools.replace_in_file(os.path.join(self._src_folder, "c++", "cmake", "CapnProtoMacros.cmake"),
                 'COMMAND "${CAPNP_EXECUTABLE}"',
                 'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${CONAN_LIB_DIRS_CAPNPROTO}:${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}" ${CAPNP_EXECUTABLE}'
                 )
-            tools.replace_in_file(os.path.join(self._src_folder, "src", "kj", "CMakeLists.txt"),
+            tools.replace_in_file(os.path.join(self._src_folder, "c++", "src", "kj", "CMakeLists.txt"),
                 'set_target_properties(kj PROPERTIES VERSION ${VERSION})',
                 'set_target_properties(kj PROPERTIES VERSION ${VERSION})\nset_target_properties(kj PROPERTIES POSITION_INDEPENDENT_CODE ON)'
                 )
-            tools.replace_in_file(os.path.join(self._src_folder, "src", "capnp", "CMakeLists.txt"),
+            tools.replace_in_file(os.path.join(self._src_folder, "c++", "src", "capnp", "CMakeLists.txt"),
                 'set_target_properties(capnp PROPERTIES VERSION ${VERSION})',
                 'set_target_properties(capnp PROPERTIES VERSION ${VERSION})\nset_target_properties(capnp PROPERTIES POSITION_INDEPENDENT_CODE ON)'
                 )
        
        
         if self.settings.os == "Windows":
-            tools.replace_in_file(os.path.join(self._src_folder, "src", "capnp", "CMakeLists.txt"),
+            tools.patch(base_path=self._src_folder, patch_file='patches/000-fix-windows-minmax.diff')
+            tools.patch(base_path=self._src_folder, patch_file='patches/001-async-io-win32-vs19.diff')
+            tools.patch(base_path=self._src_folder, patch_file='patches/002-fix-windows-sanity-nogdi-case-again.diff')
+            tools.replace_in_file(os.path.join(self._src_folder, "c++", "src", "capnp", "CMakeLists.txt"),
                 'install(CODE "execute_process(COMMAND \\"${CMAKE_COMMAND}\\" -E create_symlink capnp${CMAKE_EXECUTABLE_SUFFIX} \\"\\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\\")")',
                 '#install(CODE "execute_process(COMMAND \\"${CMAKE_COMMAND}\\" -E create_symlink capnp${CMAKE_EXECUTABLE_SUFFIX} \\"\\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_BINDIR}/capnpc${CMAKE_EXECUTABLE_SUFFIX}\\")")'
                 )
