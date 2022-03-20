@@ -41,6 +41,20 @@ class CapNProtoConan(ConanFile):
 
     def build(self):
         cmake = self._cmake_configure()
+        tools.replace_in_file(os.path.join(self._src_folder, "c++", "src", "kj", "CMakeLists.txt"),
+            """main.h
+  windows-sanity.h
+)""",
+            """main.h
+  windows-sanity.h
+  win32-api-version.h
+)"""
+            )
+
+        tools.replace_in_file(os.path.join(self._src_folder, "c++", "src", "kj", "async-win32.h"),
+            "mutable std::atomic<bool> sentWake {false};", "mutable ::std::atomic<bool> sentWake {false};"
+            )
+
 
         if self.options.shared and self.settings.os == "Linux":
             tools.replace_in_file(os.path.join(self._src_folder, "c++", "cmake", "CapnProtoMacros.cmake"),
